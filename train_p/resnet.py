@@ -85,7 +85,7 @@ class Bottleneck(nn.Module):
 
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000):
+    def __init__(self, block, layers, size_feature=235):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -97,11 +97,12 @@ class ResNet(nn.Module):
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
         self.avgpool = nn.AvgPool2d(4, stride=1)
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(512 * block.expansion, size_feature)
 
-        self.fc_1 = nn.Linear(235,235)
-        self.fc_2 = nn.Linear(235,235)
-        self.fc_3 = nn.Linear(235,235)
+        #the size of p feauture is 235
+        self.fc_1 = nn.Linear(size_feature,size_feature)
+        self.fc_2 = nn.Linear(size_feature,size_feature)
+        self.fc_3 = nn.Linear(size_feature,size_feature)
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
