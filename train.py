@@ -12,7 +12,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])
 ])
-dataset = ImageFolder(root_path,transforms)
+dataset = ImageFolder(root_path,transform)
 model = Model(len(dataset))
 optim_c = opt.Adam(filter(lambda x : x.requires_grad is not False, model.c.parameters()),lr=0.0008,weight_decay=0.0005)
 optim_d = opt.Adam(filter(lambda x : x.requires_grad is not False, model.d.parameters()),lr=0.0008,weight_decay=0.0005)
@@ -24,10 +24,11 @@ k = 0
 for step,e in enumerate(range(50)):
     loader = DataLoader(dataset,batch_size=32,shuffle=True,drop_last=True)
     print("%d epoch"%(e+1))
-    for data, label in enumerate(loader):
-        data = data.cuda()
+    for step, data in loader:
+        inputs, labels = data
+        inputs, labels = inputs.cuda(), labels.cuda()
         r_x_s, r_x_r, f_p_s, f_p_t, f_id_s, f_id_r, c_x_r, c_x_s = model(data)
-        lamda = losses.update_lamda(step)
+        lamda = losses.update_lamda(step+1)
         ld, lc, lg = losses.get_loss(r_x_s, r_x_r, f_p_s,f_p_t, f_id_s, f_id_r, c_x_r, c_x_s,label,k,lamda)
         k = losses.update_k(k, r_x_r, r_x_s)
 
@@ -46,10 +47,12 @@ for step,e in enumerate(range(50)):
         if (step+1)% 50000 ==0:
             for param_group in optim_g.param_groups:
                 param_group['lr'] = param_group['lr'] - 0.0002
-            for param_group in optim_c.param_groups:
-                param_group['lr'] = param_group['lr'] - 0.0002
             for param_group in optim_d.param_groups:
                 param_group['lr'] = param_group['lr'] - 0.0002
+
+        if (step + 1) == (150000 * 1.5):
+            for param_group in optim_c.param_groups:
+                param_group['lr'] = 0.0005
 
     if optim_g.param_groups[0]['lr'] <= 0:
         break
