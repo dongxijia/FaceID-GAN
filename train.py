@@ -22,7 +22,7 @@ model.cuda()
 model.train()
 k = t.FloatTensor(1).cuda()
 for step,e in enumerate(range(50)):
-    loader = DataLoader(dataset,batch_size=16,shuffle=True,drop_last=True)#batch_size 16 use 7G memory
+    loader = DataLoader(dataset,batch_size=36,shuffle=True,drop_last=True)#batch_size 36 use 7.5G memory
     print("%d epoch"%(e+1))
     for step, data in loader:
         inputs, labels = data
