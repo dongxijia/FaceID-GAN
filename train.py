@@ -20,16 +20,16 @@ optim_g = opt.Adam(filter(lambda x : x.requires_grad is not False, model.g.param
 
 model.cuda()
 model.train()
-k = 0
+k = t.FloatTensor(1).cuda()
 for step,e in enumerate(range(50)):
-    loader = DataLoader(dataset,batch_size=32,shuffle=True,drop_last=True)
+    loader = DataLoader(dataset,batch_size=16,shuffle=True,drop_last=True)#batch_size 16 use 7G memory
     print("%d epoch"%(e+1))
     for step, data in loader:
         inputs, labels = data
         inputs, labels = inputs.cuda(), labels.cuda()
         r_x_s, r_x_r, f_p_s, f_p_t, f_id_s, f_id_r, c_x_r, c_x_s = model(data)
         lamda = losses.update_lamda(step+1)
-        ld, lc, lg = losses.get_loss(r_x_s, r_x_r, f_p_s,f_p_t, f_id_s, f_id_r, c_x_r, c_x_s,label,k,lamda)
+        ld, lc, lg = losses.get_loss(r_x_s, r_x_r, f_p_s,f_p_t, f_id_s, f_id_r, c_x_r, c_x_s,labels,k,lamda)
         k = losses.update_k(k, r_x_r, r_x_s)
 
         optim_d.zero_grad()

@@ -9,7 +9,7 @@ lamda_3 = 0.3
 def get_loss(r_x_s, r_x_r, f_p_s,f_p_t, f_id_s, f_id_r, c_x_r, c_x_s,label,k,lamda):
     ld = r_x_r-k*r_x_s
     lc = CE(c_x_r,label) + lamda*CE(c_x_s,label)
-    lg = lamda_1*r_x_s + lamda_2*cosine_distance(f_id_r,f_id_s.t()) +lamda_3*l2_distance(f_p_s,f_p_t)
+    lg = lamda_1*r_x_s + lamda_2*cosine_distance(f_id_r,f_id_s) +lamda_3*l2_distance(f_p_s,f_p_t)
     return ld,lc,lg
 
 def cosine_distance(f1,f2):
@@ -17,7 +17,7 @@ def cosine_distance(f1,f2):
     f2_norm = t.norm(f2,p=2,dim=1)
     norm = f1_norm.mul(f2_norm)
     print('norm shape ',norm.shape)
-    d = 1 - t.mm(f1,f2)/norm.unsqueeze(1)
+    d = 1 - t.mm(f1,f2.t())/norm.unsqueeze(1)
     return t.sum(t.diag(d,0))
 
 def l2_distance(f1,f2):
